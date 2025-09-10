@@ -1,35 +1,36 @@
 from django.db import models
-
 import datetime
 from django.utils import timezone
 
-class question(models.Model):
-    title = models.CharField(max_length=200, null = False)
-    details = models.TextField(null=False)
-    trying = models.TextField()
-    cdate = models.DateTimeField("Posted on ")
-    user = models.CharField(max_length=200, null=False, default="anonymous")
+
+class Pergunta(models.Model):
+    titulo = models.CharField(max_length=200, null=False)
+    detalhe = models.TextField(null=False)
+    tentativa = models.TextField()
+    data_criacao = models.DateTimeField("Criado em ")
+    usuario = models.CharField(max_length=200, null=False, default="anônimo")
 
     def __str__(self):
-        return "[" + str(self.id) + "] " + self.title
+        return "[" + str(self.id) + "] " + self.titulo
     
-    def detstring(self):
-        return "id: " + str(self.id) + "; title: " + self.title + "; details: " + self.details + "; try: " + self.trying + "; posted on: " + str(self.cdate) + "; user: " + self.user
+    def foi_publicado_recentemente(self):
+        return self.data_criacao >= timezone.now() - datetime.timedelta(days=1)
 
-    def recently(self):
-        return self.cdate >= timezone.now() - datetime.timedelta(days=1)
+    def string_detalhada(self):
+        return "id: " + str(self.id) + "; titulo: " + self.titulo + "; detalhe: " + self.detalhe + "; tentativa: " + self.tentativa + "; data criação: " + str(self.data_criacao) + "; usuario: " + self.usuario
 
-class answer(models.Model):
-    question = models.ForeignKey(question, on_delete=models.CASCADE)
-    text = models.TextField(null=False)
-    votes = models.IntegerField(default=0)
-    cdate = models.DateTimeField("Posted on ")
-    user = models.CharField(max_length=200, null=False, default="anonymous")
+
+class Resposta(models.Model):
+    pergunta = models.ForeignKey(Pergunta, on_delete=models.CASCADE)
+    texto = models.TextField(null=False)
+    votos = models.IntegerField(default=0)
+    data_criacao = models.DateTimeField("Criado em ")
+    usuario = models.CharField(max_length=200, null=False, default="anônimo")
+
 
     def __str__(self):
-        return "[" + str(self.id) + "] " + self.text
-        
-    def recently(self):
-        return self.cdate >= timezone.now() - datetime.timedelta(days=1)
+        return "[" + str(self.id) + "] " + self.texto
     
-# Create your models here.
+    def foi_publicado_recentemente(self):
+        return self.data_criacao >= timezone.now() - datetime.timedelta(days=1)
+    

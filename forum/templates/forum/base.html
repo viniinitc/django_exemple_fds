@@ -1,15 +1,15 @@
 <html>
 <head>
-    <title>Exemple StackOverflow</title>
+    <title>Exemplo StackOverflow</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
 </head>
 <body>
     <header>
         <h1>Fórum MyStackOverflow</h1>
         <nav>
             <a href="{% url 'forum:index' %}">Home</a> | 
-            <a href="{% url 'forum:insert_question' %}">ask a question</a>
+            <a href="{% url 'forum:inserir_pergunta' %}">Criar pergunta</a>
         </nav>
     </header>
 

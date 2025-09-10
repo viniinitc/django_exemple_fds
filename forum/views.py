@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
 
-from .models import question, answer
+from django.http import HttpResponse, Http404
+from .models import Pergunta, Resposta
+
 from django.views import View
 
 from django.utils import timezone
@@ -10,79 +11,79 @@ from django.urls import reverse
 
 class MainView(View):
     def get(self, request):
-        list_last_questions = answer.objects.order_by("-Posted on")
-        context = {'answers': list_last_questions}
-        return render(request, 'forum/index.html', context)
+        lista_ultimas_questoes = Pergunta.objects.order_by("-data_criacao")
+        contexto = {'perguntas' : lista_ultimas_questoes}
+        return render(request, 'forum/index.html', contexto)
 
-class QuestionView(View):
-    def get(self, request, Question_id):
+class PerguntaView(View):
+    def get(self, request, pergunta_id):
         try:
-            Question = question.objects.get(pk=Question_id)
-        except question.DoesNotExist:
-            raise Http404("Question does not exist")
-        context = {'question': Question}
-        return render(request, 'forum/details.html', context)
-    
-class VoteView(View):
-    def get(self, request, Question_id):
-        try:
-            Question = question.objects.get(pk=Question_id)
-        except question.DoesNotExist:
-            raise Http404("question does not exist")
-        return HttpResponse(str(Question) + "; votes: " + str(Question.votes))
+            pergunta = Pergunta.objects.get(pk=pergunta_id)
+        except Pergunta.DoesNotExist:
+            raise Http404("Pergunta inexistente")
+        contexto = {'pergunta' : pergunta}
+        return render(request, 'forum/detalhe.html', contexto)
 
-    def post(self, request, Question_id):
+class VotoView(View):
+    def get(self, request, resposta_id):
         try:
-            Question = question.objects.get(pk=Question_id)
-        except question.DoesNotExist:
-            raise Http404("question does not exist")
-        Question.votes += 1
-        Question.save()
-        return redirect(reverse('forum:details', args=[Question.Question.id]))
+            resposta = Resposta.objects.get(pk=resposta_id)
+        except Resposta.DoesNotExist:
+            raise Http404("Resposta inexistente")
+        return HttpResponse(str(resposta) + "; votos: " + str(resposta.votos))
 
-class MakeQuestionView(View):
+    def post(self, request, resposta_id):
+        try:
+            resposta = Resposta.objects.get(pk=resposta_id)
+        except Resposta.DoesNotExist:
+            raise Http404("Resposta inexistente")
+        resposta.votos += 1
+        resposta.save()
+        return redirect(reverse('forum:detalhe', args=[resposta.pergunta.id]))
+
+class InserirPerguntaView(View):
     def get(self, request):
-        return render(request, 'forum/AskQuestion.html')
+        return render(request, 'forum/inserir_pergunta.html')
 
     def post(self, request):
         if request.user.is_authenticated:
-            User = request.user.username
+            usuario = request.user.username
         else:
-            User = 'anonymous'
-        title = request.POST.get('title')
-        details = request.POST.get('details')
-        trying = request.POST.get('trying')
-        cdate = timezone.now()
+            usuario = 'anônimo'
+        titulo = request.POST.get('titulo')
+        detalhe = request.POST.get('detalhe')
+        tentativa = request.POST.get('tentativa')
+        data_criacao = timezone.now()
         
-        Question = question(title=title, details=details, 
-        trying=trying, 	cdate=cdate, User=User)
-        Question.save()
+        pergunta = Pergunta(titulo=titulo, detalhe=detalhe, 
+tentativa=tentativa, 	data_criacao=data_criacao, usuario=usuario)
+        pergunta.save()
 
-        return redirect(reverse('forum:details', args=[Question.id]))
-    
-class AnswerSomething(View):
-    def get(self, request, Question_id):
-        try:
-            Question = question.objects.get(pk=Question_id)
-        except question.DoesNotExist:
-            raise Http404("Question does not exist")
-        context = {'Question' : question}
-        return render(request, 'forum/answersomething.html', context)
+        return redirect(reverse('forum:detalhe', args=[pergunta.id]))
 
-    def post(self, request, Question_id):
+class InserirRespostaView(View):
+    def get(self, request, pergunta_id):
         try:
-            Question = question.objects.get(pk=Question_id)
-        except question.DoesNotExist:
-            raise Http404("Question does not exist")
+            pergunta = Pergunta.objects.get(pk=pergunta_id)
+        except Pergunta.DoesNotExist:
+            raise Http404("Pergunta inexistente")
+        contexto = {'pergunta' : pergunta}
+        return render(request, 'forum/inserir_resposta.html', contexto)
+
+    def post(self, request, pergunta_id):
+        try:
+            pergunta = Pergunta.objects.get(pk=pergunta_id)
+        except Pergunta.DoesNotExist:
+            raise Http404("Pergunta inexistente")
 
         if request.user.is_authenticated:
-            User = request.user.username
+            usuario = request.user.username
         else:
-            User = 'anonymous'
-        text = request.POST.get('text')
-        cdate = timezone.now()
+            usuario = 'anônimo'
+        texto = request.POST.get('texto')
+        data_criacao = timezone.now()
         
-        Question.answer_set.create(text=text, cdate=cdate, User=User)
+        pergunta.resposta_set.create(texto=texto, data_criacao=data_criacao, usuario=usuario)
 
-        return redirect(reverse('forum:details', args=[Question.id]))
+        return redirect(reverse('forum:detalhe', args=[pergunta.id]))
 
