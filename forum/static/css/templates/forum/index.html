@@ -1,0 +1,22 @@
+{% extends "forum/base.html" %}
+
+{% block content %}
+{% if question %}
+    <h2>Last questions</h2>
+    <ul>
+    {% for question in questions %}
+        <li>
+            <a href="{% url 'forum:details' question.id %}">
+                {{ question.title }}
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No question to be displayed.</p>
+{% endif %}
+<a href="{% url 'forum:insert_question' %}">
+    <button>New question</button>
+</a>
+{% endblock %}
+

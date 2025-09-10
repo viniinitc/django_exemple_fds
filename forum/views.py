@@ -15,9 +15,9 @@ class MainView(View):
         return render(request, 'forum/index.html', context)
 
 class QuestionView(View):
-    def get(self, request, question_id):
+    def get(self, request, Question_id):
         try:
-            Question = question.objects.get(pk=question_id)
+            Question = question.objects.get(pk=Question_id)
         except question.DoesNotExist:
             raise Http404("Question does not exist")
         context = {'question': Question}
@@ -38,7 +38,7 @@ class VoteView(View):
             raise Http404("question does not exist")
         Question.votes += 1
         Question.save()
-        return redirect(reverse('forum:details', args=[Question.pergunta.id]))
+        return redirect(reverse('forum:details', args=[Question.Question.id]))
 
 class MakeQuestionView(View):
     def get(self, request):
@@ -58,7 +58,7 @@ class MakeQuestionView(View):
         trying=trying, 	cdate=cdate, User=User)
         Question.save()
 
-        return redirect(reverse('forum:detalhe', args=[Question.id]))
+        return redirect(reverse('forum:details', args=[Question.id]))
     
 class AnswerSomething(View):
     def get(self, request, Question_id):
@@ -69,9 +69,9 @@ class AnswerSomething(View):
         context = {'Question' : question}
         return render(request, 'forum/answersomething.html', context)
 
-    def post(self, request, pergunta_id):
+    def post(self, request, Question_id):
         try:
-            Question = question.objects.get(pk=pergunta_id)
+            Question = question.objects.get(pk=Question_id)
         except question.DoesNotExist:
             raise Http404("Question does not exist")
 
